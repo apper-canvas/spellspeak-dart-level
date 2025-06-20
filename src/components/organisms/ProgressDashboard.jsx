@@ -30,9 +30,12 @@ const ProgressDashboard = () => {
   const calculateStats = () => {
     if (sessions.length === 0) return { totalWords: 0, accuracy: 0, averageScore: 0, bestScore: 0 };
 
-    const totalWords = sessions.reduce((sum, session) => sum + session.wordAttempts.length, 0);
+const totalWords = sessions.reduce((sum, session) => 
+      sum + (session.wordAttempts?.length || 0) + (session.sentenceAttempts?.length || 0), 0
+    );
     const correctWords = sessions.reduce((sum, session) => 
-      sum + session.wordAttempts.filter(attempt => attempt.isCorrect).length, 0
+      sum + (session.wordAttempts?.filter(attempt => attempt.isCorrect).length || 0) +
+          (session.sentenceAttempts?.filter(attempt => attempt.isCorrect).length || 0), 0
     );
     const accuracy = totalWords > 0 ? Math.round((correctWords / totalWords) * 100) : 0;
     const averageScore = sessions.length > 0 ? Math.round(sessions.reduce((sum, session) => sum + session.score, 0) / sessions.length) : 0;
@@ -179,8 +182,8 @@ const ProgressDashboard = () => {
                 </div>
                 
                 <div>
-                  <p className="font-medium text-gray-800">
-                    {session.wordAttempts.length} words practiced
+<p className="font-medium text-gray-800">
+                    {(session.wordAttempts?.length || 0) + (session.sentenceAttempts?.length || 0)} items practiced
                   </p>
                   <p className="text-sm text-gray-600">
                     {format(new Date(session.timestamp), 'MMM d, yyyy • h:mm a')}
@@ -189,8 +192,9 @@ const ProgressDashboard = () => {
               </div>
 
               <div className="text-right">
-                <p className="text-sm text-gray-600">
-                  {session.wordAttempts.filter(a => a.isCorrect).length} correct
+<p className="text-sm text-gray-600">
+                  {(session.wordAttempts?.filter(a => a.isCorrect).length || 0) + 
+                   (session.sentenceAttempts?.filter(a => a.isCorrect).length || 0)} correct
                 </p>
                 <div className="flex space-x-1 mt-1">
                   {[...Array(5)].map((_, i) => (

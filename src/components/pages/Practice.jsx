@@ -6,6 +6,7 @@ import Card from '../atoms/Card';
 
 const Practice = () => {
   const [selectedGrade, setSelectedGrade] = useState(null);
+  const [practiceMode, setPracticeMode] = useState('word'); // 'word' or 'sentence'
 
   const handleGradeSelect = (grade) => {
     setSelectedGrade(grade);
@@ -13,6 +14,10 @@ const Practice = () => {
 
   const handleBack = () => {
     setSelectedGrade(null);
+  };
+
+  const handleModeChange = (mode) => {
+    setPracticeMode(mode);
   };
 
   return (
@@ -23,7 +28,7 @@ const Practice = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          {!selectedGrade ? (
+{!selectedGrade ? (
             <div className="max-w-4xl mx-auto">
               {/* Header */}
               <div className="text-center mb-12">
@@ -36,9 +41,55 @@ const Practice = () => {
                   Let's Practice Spelling!
                 </motion.h1>
                 <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                  Choose your grade level to start practicing with words that are just right for you.
+                  Choose your practice mode and grade level to get started.
                 </p>
               </div>
+
+              {/* Practice Mode Selector */}
+              <Card padding="lg" className="bg-white shadow-lg mb-8">
+                <h3 className="text-xl font-semibold text-center text-gray-800 mb-6">Choose Practice Mode</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <button
+                      onClick={() => handleModeChange('word')}
+                      className={`w-full p-6 rounded-xl border-2 transition-all ${
+                        practiceMode === 'word'
+                          ? 'border-primary bg-primary/5 shadow-lg'
+                          : 'border-gray-200 hover:border-primary/50'
+                      }`}
+                    >
+                      <div className="text-center">
+                        <div className="text-4xl mb-3">📝</div>
+                        <h4 className="text-lg font-semibold text-gray-800 mb-2">Word Practice</h4>
+                        <p className="text-sm text-gray-600">Practice spelling individual words with voice recognition</p>
+                      </div>
+                    </button>
+                  </motion.div>
+                  
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <button
+                      onClick={() => handleModeChange('sentence')}
+                      className={`w-full p-6 rounded-xl border-2 transition-all ${
+                        practiceMode === 'sentence'
+                          ? 'border-primary bg-primary/5 shadow-lg'
+                          : 'border-gray-200 hover:border-primary/50'
+                      }`}
+                    >
+                      <div className="text-center">
+                        <div className="text-4xl mb-3">📖</div>
+                        <h4 className="text-lg font-semibold text-gray-800 mb-2">Sentence Practice</h4>
+                        <p className="text-sm text-gray-600">Practice complete sentences with grammar and spelling feedback</p>
+                      </div>
+                    </button>
+                  </motion.div>
+                </div>
+              </Card>
 
               {/* Grade Level Selector */}
               <Card padding="xl" className="bg-white shadow-xl">
@@ -104,9 +155,10 @@ const Practice = () => {
               </motion.div>
             </div>
           ) : (
-            <PracticeInterface 
+<PracticeInterface 
               gradeLevel={selectedGrade} 
               onBack={handleBack}
+              practiceMode={practiceMode}
             />
           )}
         </motion.div>

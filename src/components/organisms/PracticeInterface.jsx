@@ -1,21 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { toast } from 'react-toastify';
-import VoiceRecorder from '../molecules/VoiceRecorder';
-import WordComparison from '../molecules/WordComparison';
-import StarProgress from '../molecules/StarProgress';
-import Button from '../atoms/Button';
-import Card from '../atoms/Card';
-import ApperIcon from '../ApperIcon';
-import wordListService from '@/services/api/wordListService';
-import practiceSessionService from '@/services/api/practiceSessionService';
+import React, { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { toast } from "react-toastify";
+import VoiceRecorder from "@/components/molecules/VoiceRecorder";
+import WordComparison from "@/components/molecules/WordComparison";
+import StarProgress from "@/components/molecules/StarProgress";
+import Button from "@/components/atoms/Button";
+import Card from "@/components/atoms/Card";
+import ApperIcon from "@/components/ApperIcon";
+import sentenceService from "@/services/api/sentenceService";
+import practiceSessionService from "@/services/api/practiceSessionService";
+import wordListService from "@/services/api/wordListService";
 
-const PracticeInterface = ({ gradeLevel, onBack }) => {
+const PracticeInterface = ({ gradeLevel, onBack, practiceMode = 'word' }) => {
   const [wordLists, setWordLists] = useState([]);
+  const [sentenceLists, setSentenceLists] = useState([]);
   const [currentWordList, setCurrentWordList] = useState(null);
+  const [currentSentenceList, setCurrentSentenceList] = useState(null);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
+  const [currentSentenceIndex, setCurrentSentenceIndex] = useState(0);
   const [currentWord, setCurrentWord] = useState('');
-  const [transcribedWord, setTranscribedWord] = useState('');
+  const [currentSentence, setCurrentSentence] = useState('');
+  const [transcribedText, setTranscribedText] = useState('');
   const [showComparison, setShowComparison] = useState(false);
   const [sessionAttempts, setSessionAttempts] = useState([]);
   const [sessionScore, setSessionScore] = useState(0);
@@ -25,34 +30,71 @@ const PracticeInterface = ({ gradeLevel, onBack }) => {
   useEffect(() => {
     loadWordLists();
   }, [gradeLevel]);
-
-  const loadWordLists = async () => {
+const loadWordLists = async () => {
     setLoading(true);
     try {
-      const lists = await wordListService.getByGradeLevel(gradeLevel);
-      setWordLists(lists);
-      if (lists.length > 0) {
-        setCurrentWordList(lists[0]);
-        setCurrentWord(lists[0].words[0]);
+      if (practiceMode === 'word') {
+        const lists = await wordListService.getByGradeLevel(gradeLevel);
+        setWordLists(lists);
+        if (lists.length > 0) {
+          setCurrentWordList(lists[0]);
+          setCurrentWord(lists[0].words[0]);
+        }
+      } else {
+        const lists = await sentenceService.getByGradeLevel(gradeLevel);
+        setSentenceLists(lists);
+        if (lists.length > 0) {
+          setCurrentSentenceList(lists[0]);
+          setCurrentSentence(lists[0].sentences[0]);
+        }
       }
     } catch (error) {
-      toast.error('Failed to load word lists');
+      toast.error(`Failed to load ${practiceMode} lists`);
     } finally {
       setLoading(false);
     }
   };
-
-  const handleTranscription = (transcript) => {
-    setTranscribedWord(transcript);
+const handleTranscription = async (transcript) => {
+    setTranscribedText(transcript);
     setShowComparison(true);
+    let attempt;
+    let isCorrect = false;
     
-    const isCorrect = transcript.toLowerCase() === currentWord.toLowerCase();
-    const attempt = {
-      targetWord: currentWord,
-      transcribedWord: transcript,
-      isCorrect,
-      timestamp: new Date().toISOString()
-    };
+    if (practiceMode === 'word') {
+      isCorrect = transcript.toLowerCase() === currentWord.toLowerCase();
+      attempt = {
+        type: 'word',
+        targetWord: currentWord,
+        transcribedWord: transcript,
+        isCorrect,
+        timestamp: new Date().toISOString()
+      };
+    } else {
+      // For sentences, analyze grammar and spelling
+      try {
+        const analysis = await sentenceService.analyzeSentence(currentSentence, transcript);
+        isCorrect = analysis.overallScore >= 80;
+        attempt = {
+          type: 'sentence',
+          targetSentence: currentSentence,
+          transcribedSentence: transcript,
+          isCorrect,
+          grammarAnalysis: analysis,
+          timestamp: new Date().toISOString()
+        };
+      } catch (error) {
+        console.error('Analysis error:', error);
+        isCorrect = false;
+        attempt = {
+          type: 'sentence',
+          targetSentence: currentSentence,
+          transcribedSentence: transcript,
+          isCorrect,
+          grammarAnalysis: { overallScore: 0, feedback: 'Analysis failed' },
+          timestamp: new Date().toISOString()
+        };
+      }
+    }
     
     setSessionAttempts(prev => [...prev, attempt]);
     
@@ -70,34 +112,51 @@ const PracticeInterface = ({ gradeLevel, onBack }) => {
     const newScore = Math.round((correctCount / newAttempts.length) * 100);
     setSessionScore(newScore);
   };
-
-  const nextWord = () => {
-    if (!currentWordList) return;
-    
-    const nextIndex = (currentWordIndex + 1) % currentWordList.words.length;
-    setCurrentWordIndex(nextIndex);
-    setCurrentWord(currentWordList.words[nextIndex]);
-    setTranscribedWord('');
+const nextItem = () => {
+    if (practiceMode === 'word') {
+      if (!currentWordList) return;
+      const nextIndex = (currentWordIndex + 1) % currentWordList.words.length;
+      setCurrentWordIndex(nextIndex);
+      setCurrentWord(currentWordList.words[nextIndex]);
+    } else {
+      if (!currentSentenceList) return;
+      const nextIndex = (currentSentenceIndex + 1) % currentSentenceList.sentences.length;
+      setCurrentSentenceIndex(nextIndex);
+      setCurrentSentence(currentSentenceList.sentences[nextIndex]);
+    }
+    setTranscribedText('');
     setShowComparison(false);
   };
 
-  const changeWordList = (listId) => {
-    const newList = wordLists.find(list => list.Id === listId);
-    if (newList) {
-      setCurrentWordList(newList);
-      setCurrentWordIndex(0);
-      setCurrentWord(newList.words[0]);
-      setTranscribedWord('');
-      setShowComparison(false);
+  const changeList = (listId) => {
+    if (practiceMode === 'word') {
+      const newList = wordLists.find(list => list.Id === listId);
+      if (newList) {
+        setCurrentWordList(newList);
+        setCurrentWordIndex(0);
+        setCurrentWord(newList.words[0]);
+        setTranscribedText('');
+        setShowComparison(false);
+      }
+    } else {
+      const newList = sentenceLists.find(list => list.Id === listId);
+      if (newList) {
+        setCurrentSentenceList(newList);
+        setCurrentSentenceIndex(0);
+        setCurrentSentence(newList.sentences[0]);
+        setTranscribedText('');
+        setShowComparison(false);
+      }
     }
-  };
-
-  const saveSession = async () => {
+const saveSession = async () => {
     if (sessionAttempts.length === 0) return;
     
     try {
+    try {
       await practiceSessionService.create({
-        wordAttempts: sessionAttempts,
+        practiceMode,
+        wordAttempts: practiceMode === 'word' ? sessionAttempts : [],
+        sentenceAttempts: practiceMode === 'sentence' ? sessionAttempts : [],
         score: sessionScore,
         duration: Math.floor(Date.now() / 1000) // Simple duration calculation
       });
@@ -159,10 +218,10 @@ const PracticeInterface = ({ gradeLevel, onBack }) => {
       <div className="flex items-center justify-between">
         <Button variant="ghost" onClick={onBack} icon="ArrowLeft">
           Back to Grade Selection
-        </Button>
-        
-        <div className="text-center">
-          <h2 className="text-2xl font-display text-primary">Grade {gradeLevel} Practice</h2>
+<div className="text-center">
+          <h2 className="text-2xl font-display text-primary">
+            Grade {gradeLevel} {practiceMode === 'word' ? 'Word' : 'Sentence'} Practice
+          </h2>
           <StarProgress current={earnedStars} total={totalStars} className="mt-2" />
         </div>
         
@@ -170,17 +229,17 @@ const PracticeInterface = ({ gradeLevel, onBack }) => {
           Save Session
         </Button>
       </div>
-
-      {/* Word List Selector */}
-      {wordLists.length > 1 && (
+{/* List Selector */}
+      {((practiceMode === 'word' && wordLists.length > 1) || 
+        (practiceMode === 'sentence' && sentenceLists.length > 1)) && (
         <Card padding="md" className="bg-white">
           <div className="flex flex-wrap gap-2 justify-center">
-            {wordLists.map((list) => (
+            {(practiceMode === 'word' ? wordLists : sentenceLists).map((list) => (
               <Button
                 key={list.Id}
-                variant={currentWordList?.Id === list.Id ? 'primary' : 'outline'}
+                variant={(practiceMode === 'word' ? currentWordList?.Id : currentSentenceList?.Id) === list.Id ? 'primary' : 'outline'}
                 size="sm"
-                onClick={() => changeWordList(list.Id)}
+                onClick={() => changeList(list.Id)}
               >
                 {list.category}
               </Button>
@@ -188,46 +247,88 @@ const PracticeInterface = ({ gradeLevel, onBack }) => {
           </div>
         </Card>
       )}
-
-      {/* Current Word Display */}
+{/* Current Item Display */}
       <Card className="text-center bg-gradient-to-br from-primary/5 to-purple-100">
         <motion.div
-          key={currentWord}
+          key={practiceMode === 'word' ? currentWord : currentSentence}
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: 'spring', bounce: 0.3 }}
         >
-          <h3 className="text-sm font-medium text-gray-600 mb-2">Say this word:</h3>
-          <p className="text-4xl md:text-6xl font-display text-primary mb-4">
-            {currentWord}
+          <h3 className="text-sm font-medium text-gray-600 mb-2">
+            Say this {practiceMode === 'word' ? 'word' : 'sentence'}:
+          </h3>
+          <p className={`font-display text-primary mb-4 ${
+            practiceMode === 'word' ? 'text-4xl md:text-6xl' : 'text-xl md:text-2xl'
+          }`}>
+            {practiceMode === 'word' ? currentWord : currentSentence}
           </p>
           <p className="text-gray-600">
-            Word {currentWordIndex + 1} of {currentWordList?.words.length || 0}
+            {practiceMode === 'word' 
+              ? `Word ${currentWordIndex + 1} of ${currentWordList?.words.length || 0}`
+              : `Sentence ${currentSentenceIndex + 1} of ${currentSentenceList?.sentences.length || 0}`
+            }
           </p>
         </motion.div>
       </Card>
 
-      {/* Voice Recorder */}
-      <Card className="bg-white">
+<Card className="bg-white">
         <VoiceRecorder
           onTranscription={handleTranscription}
-          targetWord={currentWord}
-          isActive={Boolean(currentWord)}
+          targetWord={practiceMode === 'word' ? currentWord : currentSentence}
+          isActive={Boolean(practiceMode === 'word' ? currentWord : currentSentence)}
+          mode={practiceMode}
         />
       </Card>
-
-      {/* Word Comparison */}
+{/* Comparison and Feedback */}
       {showComparison && (
         <Card className="bg-white">
-          <WordComparison
-            targetWord={currentWord}
-            transcribedWord={transcribedWord}
-            showComparison={showComparison}
-          />
+          {practiceMode === 'word' ? (
+            <WordComparison
+              targetWord={currentWord}
+              transcribedWord={transcribedText}
+              showComparison={showComparison}
+            />
+          ) : (
+            <div className="space-y-6">
+              {/* Sentence Comparison */}
+              <div className="text-center">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">Your Response:</h3>
+                <div className="bg-gray-50 p-4 rounded-lg mb-4">
+                  <p className="text-lg text-gray-700">{transcribedText}</p>
+                </div>
+                <div className="bg-primary/5 p-4 rounded-lg">
+                  <p className="text-sm text-gray-600 mb-1">Target sentence:</p>
+                  <p className="text-lg text-primary">{currentSentence}</p>
+                </div>
+              </div>
+              
+              {/* Grammar Feedback */}
+              {sessionAttempts[sessionAttempts.length - 1]?.grammarAnalysis && (
+                <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg">
+                  <h4 className="text-lg font-semibold text-gray-800 mb-4">📝 Feedback</h4>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Overall Score:</span>
+                      <span className="text-2xl font-bold text-primary">
+                        {sessionAttempts[sessionAttempts.length - 1].grammarAnalysis.overallScore}%
+                      </span>
+                    </div>
+                    {sessionAttempts[sessionAttempts.length - 1].grammarAnalysis.feedback && (
+                      <div className="text-sm text-gray-700">
+                        <p className="font-medium mb-2">Tips for improvement:</p>
+                        <p>{sessionAttempts[sessionAttempts.length - 1].grammarAnalysis.feedback}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
           
           <div className="flex justify-center mt-6">
-            <Button onClick={nextWord} variant="primary" size="lg">
-              Next Word
+            <Button onClick={nextItem} variant="primary" size="lg">
+              Next {practiceMode === 'word' ? 'Word' : 'Sentence'}
               <ApperIcon name="ArrowRight" className="w-5 h-5 ml-2" />
             </Button>
           </div>

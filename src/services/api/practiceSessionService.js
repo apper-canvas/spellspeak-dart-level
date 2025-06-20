@@ -22,12 +22,15 @@ const practiceSessionService = {
     return sorted;
   },
 
-  async create(item) {
+async create(item) {
     await delay(300);
     const newItem = {
       ...item,
       Id: Math.max(...practiceSessionData.map(item => item.Id), 0) + 1,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      practiceMode: item.practiceMode || 'word',
+      wordAttempts: item.wordAttempts || [],
+      sentenceAttempts: item.sentenceAttempts || []
     };
     practiceSessionData.push(newItem);
     return { ...newItem };

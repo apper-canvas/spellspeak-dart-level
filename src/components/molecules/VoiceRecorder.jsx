@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Button from '../atoms/Button';
 import ApperIcon from '../ApperIcon';
 
-const VoiceRecorder = ({ onTranscription, targetWord, isActive = false }) => {
+const VoiceRecorder = ({ onTranscription, targetWord, isActive = false, mode = 'word' }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [audioLevel, setAudioLevel] = useState(0);
   const mediaRecorderRef = useRef(null);
@@ -18,14 +18,25 @@ const VoiceRecorder = ({ onTranscription, targetWord, isActive = false }) => {
   useEffect(() => {
     if (SpeechRecognition) {
       recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = false;
-      recognitionRef.current.interimResults = false;
+      recognitionRef.current.continuous = mode === 'sentence';
+      recognitionRef.current.interimResults = mode === 'sentence';
       recognitionRef.current.lang = 'en-US';
 
-      recognitionRef.current.onresult = (event) => {
-        const transcript = event.results[0][0].transcript.toLowerCase().trim();
-        onTranscription(transcript);
-        setIsRecording(false);
+recognitionRef.current.onresult = (event) => {
+        if (mode === 'sentence') {
+          // For sentences, get the latest result
+          const resultIndex = event.results.length - 1;
+          const transcript = event.results[resultIndex][0].transcript.trim();
+          if (event.results[resultIndex].isFinal) {
+            onTranscription(transcript);
+            setIsRecording(false);
+          }
+        } else {
+          // For words, use first result
+          const transcript = event.results[0][0].transcript.toLowerCase().trim();
+          onTranscription(transcript);
+          setIsRecording(false);
+        }
       };
 
       recognitionRef.current.onerror = (event) => {
@@ -33,7 +44,7 @@ const VoiceRecorder = ({ onTranscription, targetWord, isActive = false }) => {
         setIsRecording(false);
         // Fallback to mock transcription for demo
         setTimeout(() => {
-          onTranscription(targetWord || 'hello');
+          onTranscription(mode === 'sentence' ? 'The quick brown fox jumps over the lazy dog.' : (targetWord || 'hello'));
         }, 1000);
       };
 
@@ -61,17 +72,17 @@ const VoiceRecorder = ({ onTranscription, targetWord, isActive = false }) => {
       } catch (error) {
         console.error('Speech recognition start error:', error);
         // Fallback for demo
-        setTimeout(() => {
-          onTranscription(targetWord || 'hello');
+setTimeout(() => {
+          onTranscription(mode === 'sentence' ? 'The quick brown fox jumps over the lazy dog.' : (targetWord || 'hello'));
           setIsRecording(false);
-        }, 2000);
+        }, mode === 'sentence' ? 3000 : 2000);
       }
     } else {
       // Fallback for browsers without speech recognition
       setTimeout(() => {
-        onTranscription(targetWord || 'hello');
+        onTranscription(mode === 'sentence' ? 'The quick brown fox jumps over the lazy dog.' : (targetWord || 'hello'));
         setIsRecording(false);
-      }, 2000);
+      }, mode === 'sentence' ? 3000 : 2000);
     }
 
     // Start audio visualization
@@ -175,10 +186,12 @@ const VoiceRecorder = ({ onTranscription, targetWord, isActive = false }) => {
       </AnimatePresence>
 
       {/* Instructions */}
-      {!isRecording && (
+{!isRecording && (
         <p className="text-center text-gray-600 max-w-sm">
           {isActive 
-            ? "Press the microphone button and say the word clearly"
+            ? (mode === 'sentence' 
+                ? "Press the microphone button and say the sentence clearly" 
+                : "Press the microphone button and say the word clearly")
             : "Select a grade level to start practicing"
           }
         </p>

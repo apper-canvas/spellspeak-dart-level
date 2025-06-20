@@ -1,0 +1,104 @@
+[
+  {
+    "Id": 1,
+    "gradeLevel": 1,
+    "category": "Simple Sentences",
+    "sentences": [
+      "I can run fast.",
+      "The cat is big.",
+      "My dog is brown.",
+      "We like to play.",
+      "The sun is hot.",
+      "I have a red hat.",
+      "She can jump high.",
+      "The ball is round.",
+      "We go to school.",
+      "I love my mom."
+    ]
+  },
+  {
+    "Id": 2,
+    "gradeLevel": 1,
+    "category": "Family Sentences",
+    "sentences": [
+      "My family is nice.",
+      "Dad reads me stories.",
+      "Mom makes good food.",
+      "I help at home.",
+      "We play together.",
+      "My sister is funny.",
+      "Grandma gives hugs.",
+      "We eat dinner together.",
+      "I love my family.",
+      "We have fun every day."
+    ]
+  },
+  {
+    "Id": 3,
+    "gradeLevel": 2,
+    "category": "Animal Sentences",
+    "sentences": [
+      "The elephant is very big and gray.",
+      "Butterflies have colorful wings that flutter.",
+      "Rabbits hop quickly through the grass.",
+      "The chicken lays eggs in the nest.",
+      "Turtles move slowly on land.",
+      "Monkeys swing from tree to tree.",
+      "Tigers have orange fur with black stripes.",
+      "Horses run fast across the field.",
+      "Sheep have soft, fluffy wool.",
+      "Ducks swim in the pond."
+    ]
+  },
+  {
+    "Id": 4,
+    "gradeLevel": 2,
+    "category": "Nature Sentences",
+    "sentences": [
+      "The purple flowers bloom in spring.",
+      "Orange leaves fall from the trees.",
+      "Yellow sunflowers grow very tall.",
+      "The circle moon shines at night.",
+      "Square windows let in sunlight.",
+      "Triangle mountains touch the sky.",
+      "Rectangle books sit on the shelf.",
+      "Diamond snowflakes fall in winter.",
+      "Heart-shaped leaves are special.",
+      "Star patterns appear in the dark sky."
+    ]
+  },
+  {
+    "Id": 5,
+    "gradeLevel": 3,
+    "category": "Action Sentences",
+    "sentences": [
+      "Children are jumping rope in the playground.",
+      "We are swimming in the clear blue pool.",
+      "The dancers are dancing to beautiful music.",
+      "The choir is singing their favorite songs.",
+      "Students are reading interesting books quietly.",
+      "Kids are writing stories about their adventures.",
+      "Artists are drawing pictures with bright colors.",
+      "Mom is cooking dinner for the whole family.",
+      "Everyone is cleaning up after the party.",
+      "Friends are helping each other with homework."
+    ]
+  },
+  {
+    "Id": 6,
+    "gradeLevel": 3,
+    "category": "Nature Adventures",
+    "sentences": [
+      "The tall mountain peaks are covered with snow.",
+      "The deep blue ocean waves crash on the shore.",
+      "Dense forest trees provide shade for animals.",
+      "A beautiful rainbow appears after the storm.",
+      "Loud thunder rumbles across the dark sky.",
+      "Bright lightning flashes during the storm.",
+      "Colorful flowers attract busy bees and butterflies.",
+      "The magnificent waterfall crashes into the pool below.",
+      "The golden sunrise paints the sky with light.",
+      "Stars twinkle brightly in the midnight sky."
+    ]
+  }
+]
