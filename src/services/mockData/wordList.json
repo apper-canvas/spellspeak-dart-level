@@ -1,0 +1,38 @@
+[
+  {
+    "Id": 1,
+    "gradeLevel": 1,
+    "category": "Basic Words",
+    "words": ["cat", "dog", "sun", "run", "fun", "big", "red", "yes", "can", "hat"]
+  },
+  {
+    "Id": 2,
+    "gradeLevel": 1,
+    "category": "Family Words",
+    "words": ["mom", "dad", "boy", "girl", "baby", "home", "love", "hug", "kiss", "play"]
+  },
+  {
+    "Id": 3,
+    "gradeLevel": 2,
+    "category": "Animals",
+    "words": ["elephant", "butterfly", "rabbit", "chicken", "turtle", "monkey", "tiger", "horse", "sheep", "duck"]
+  },
+  {
+    "Id": 4,
+    "gradeLevel": 2,
+    "category": "Colors & Shapes",
+    "words": ["purple", "orange", "yellow", "circle", "square", "triangle", "rectangle", "diamond", "heart", "star"]
+  },
+  {
+    "Id": 5,
+    "gradeLevel": 3,
+    "category": "Action Words",
+    "words": ["jumping", "swimming", "dancing", "singing", "reading", "writing", "drawing", "cooking", "cleaning", "helping"]
+  },
+  {
+    "Id": 6,
+    "gradeLevel": 3,
+    "category": "Nature Words",
+    "words": ["mountain", "ocean", "forest", "rainbow", "thunder", "lightning", "flower", "butterfly", "waterfall", "sunrise"]
+  }
+]

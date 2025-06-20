@@ -1,0 +1,80 @@
+[
+  {
+    "Id": 1,
+    "timestamp": "2024-01-15T10:30:00Z",
+    "wordAttempts": [
+      {
+        "targetWord": "cat",
+        "transcribedWord": "cat",
+        "isCorrect": true,
+        "timestamp": "2024-01-15T10:30:15Z"
+      },
+      {
+        "targetWord": "dog",
+        "transcribedWord": "dag",
+        "isCorrect": false,
+        "timestamp": "2024-01-15T10:30:45Z"
+      },
+      {
+        "targetWord": "sun",
+        "transcribedWord": "sun",
+        "isCorrect": true,
+        "timestamp": "2024-01-15T10:31:10Z"
+      }
+    ],
+    "score": 67,
+    "duration": 120
+  },
+  {
+    "Id": 2,
+    "timestamp": "2024-01-14T14:15:00Z",
+    "wordAttempts": [
+      {
+        "targetWord": "elephant",
+        "transcribedWord": "elephant",
+        "isCorrect": true,
+        "timestamp": "2024-01-14T14:15:20Z"
+      },
+      {
+        "targetWord": "butterfly",
+        "transcribedWord": "butterfly",
+        "isCorrect": true,
+        "timestamp": "2024-01-14T14:15:55Z"
+      },
+      {
+        "targetWord": "rabbit",
+        "transcribedWord": "rabit",
+        "isCorrect": false,
+        "timestamp": "2024-01-14T14:16:25Z"
+      }
+    ],
+    "score": 67,
+    "duration": 95
+  },
+  {
+    "Id": 3,
+    "timestamp": "2024-01-13T09:45:00Z",
+    "wordAttempts": [
+      {
+        "targetWord": "purple",
+        "transcribedWord": "purple",
+        "isCorrect": true,
+        "timestamp": "2024-01-13T09:45:18Z"
+      },
+      {
+        "targetWord": "circle",
+        "transcribedWord": "circle",
+        "isCorrect": true,
+        "timestamp": "2024-01-13T09:45:42Z"
+      },
+      {
+        "targetWord": "square",
+        "transcribedWord": "square",
+        "isCorrect": true,
+        "timestamp": "2024-01-13T09:46:08Z"
+      }
+    ],
+    "score": 100,
+    "duration": 78
+  }
+]
